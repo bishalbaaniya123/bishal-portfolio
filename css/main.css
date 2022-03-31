@@ -24,6 +24,9 @@
  * Copyright 2012-2013 Mattia Larentis
  * http://www.apache.org/licenses/LICENSE-2.0
  */
+.w-90 {
+    width: 90%;
+}
 .bootstrap-switch {
   display: inline-block;
   direction: ltr;
