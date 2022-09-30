@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Bishal Baaniya - Portfolio</title>
+  <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700,200" rel="stylesheet">
+  <link href="https://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css" rel="stylesheet">
+  <link href="css/aos.css?ver=1.1.0" rel="stylesheet">
+  <link href="css/bootstrap.min.css?ver=1.1.0" rel="stylesheet">
+  <link href="css/main.css?ver=1.1.0" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/flickity@2/dist/flickity.min.css">
+  <noscript>
+    <style type="text/css">
+        [data-aos] {
+            opacity: 1 !important;
+            transform: translate(0) scale(1) !important;
+        }
+    </style>
+  </noscript>
+</head>
+<body>
+<div class="container">
+  <div class="row mt-5">
+    <div class="col-12">
+      <div class="jumbotron">
+        <div class="form-group">
+          <label for="exampleFormControlTextarea1">Add your citation here from <a href="https://citethisforme.com" target="_blank">Cite this for me</a></label>
+          <textarea class="form-control bg-white mb-3" id="exampleFormControlTextarea1" rows="3" placeholder="Add text here"></textarea>
+          <button class="btn btn-default" id="submit-form">Submit</button>
+        </div>
+      </div>
+
+      <div class="jumbotron mt-3">
+        <pre id="final-results">
+
+        </pre>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<textarea name="test" id="test" cols="30" rows="10" class="d-none"></textarea>
+
+</body>
+
+<script src="js/core/jquery.3.2.1.min.js?ver=1.1.0"></script>
+<script src="js/core/popper.min.js?ver=1.1.0"></script>
+<script src="js/core/bootstrap.min.js?ver=1.1.0"></script>
+
+<script>
+    // program to convert citethisforme to standard format
+    const getDate = () => {
+        const date = new Date();
+        return date.toLocaleDateString(undefined, {day:'2-digit'}) + ' ' + date.toLocaleDateString(undefined, {month:'long'}) + ' ' + date.toLocaleDateString(undefined, {year:'numeric'})
+    }
+
+    getFormattedCitation = (initialString) => {
+        let regex = /\[break\][\s]?/ig;
+        initialString = initialString.replaceAll(regex, '')
+
+        let pattern = /@misc\{((.+?)),/
+        let unique_id = pattern.exec(initialString);
+        if (!unique_id.length) {
+            unique_id = "INSERT_UNIQUE_ID"
+        } else {
+            unique_id = unique_id[1]
+        }
+
+        pattern = /url=\{(.+?)}/
+        let url = pattern.exec(initialString);
+        if (!url) {
+            url = "INSERT_URL"
+        } else {
+            url = url[1]
+        }
+
+        pattern = /journal=\{(.+?)}/
+        let title = pattern.exec(initialString);
+        if (!title) {
+            title = "INSERT_TITLE"
+        } else {
+            title = title[1]
+        }
+
+        pattern = /year=\{(.+?)}/
+        let year = pattern.exec(initialString);
+        if (!year) {
+            year = "INSERT_YEAR"
+        } else {
+            year = year[1]
+        }
+
+        const finalString = `
+@misc{${unique_id},
+    title = {{${title}}},
+    howpublished = {\\url{${url}}},
+    note = {Online; accessed ${getDate()}} ,
+    year=${year},
+}
+`
+        return finalString
+    }
+
+
+  $("#submit-form").click(function () {
+      const text = $("#exampleFormControlTextarea1").val()
+      const finalResults = getFormattedCitation(text)
+      $("#final-results").text(finalResults)
+
+      $("#test").val(finalResults)
+
+      // Get the text field
+      var copyText = document.getElementById("test");
+
+      // Select the text field
+      copyText.select();
+      copyText.setSelectionRange(0, 99999); // For mobile devices
+
+      // Copy the text inside the text field
+      navigator.clipboard.writeText(copyText.value);
+  })
+</script>
+</html>
