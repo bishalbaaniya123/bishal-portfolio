@@ -88,7 +88,7 @@
         pattern = /year=\{(.+?)}/
         let year = pattern.exec(initialString);
         if (!year) {
-            year = "INSERT_YEAR"
+            year = "2022"
         } else {
             year = year[1]
         }
@@ -104,23 +104,26 @@
         return finalString
     }
 
+    function updateCitation() {
 
-  $("#submit-form").click(function () {
-      const text = $("#exampleFormControlTextarea1").val()
-      const finalResults = getFormattedCitation(text)
-      $("#final-results").text(finalResults)
+        const text = $("#exampleFormControlTextarea1").val()
+        const finalResults = getFormattedCitation(text)
+        $("#final-results").text(finalResults)
 
-      $("#test").val(finalResults)
+        $("#test").val(finalResults)
 
-      // Get the text field
-      var copyText = document.getElementById("test");
+        // Get the text field
+        var copyText = document.getElementById("test");
 
-      // Select the text field
-      copyText.select();
-      copyText.setSelectionRange(0, 99999); // For mobile devices
+        // Select the text field
+        copyText.select();
+        copyText.setSelectionRange(0, 99999); // For mobile devices
 
-      // Copy the text inside the text field
-      navigator.clipboard.writeText(copyText.value);
-  })
+        // Copy the text inside the text field
+        navigator.clipboard.writeText(copyText.value);
+    }
+
+  $("#submit-form").on('click', updateCitation)
+  $('#exampleFormControlTextarea1').bind('input propertychange', updateCitation);
 </script>
 </html>
