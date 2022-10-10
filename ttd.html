@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Bishal Baaniya - Portfolio</title>
+  <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700,200" rel="stylesheet">
+  <link href="https://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css" rel="stylesheet">
+  <link href="css/aos.css?ver=1.1.0" rel="stylesheet">
+  <link href="css/bootstrap.min.css?ver=1.1.0" rel="stylesheet">
+  <link href="css/main.css?ver=1.1.0" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/flickity@2/dist/flickity.min.css">
+  <noscript>
+    <style type="text/css">
+        [data-aos] {
+            opacity: 1 !important;
+            transform: translate(0) scale(1) !important;
+        }
+    </style>
+  </noscript>
+</head>
+<body>
+<p id="clock"></p>
+<p id="clock-mins"></p>
+<p id="clock-hours"></p>
+<p id="clock-days"></p>
+<p id="clock-years"></p>
+</body>
+
+<script src="js/core/jquery.3.2.1.min.js?ver=1.1.0"></script>
+<script src="js/core/popper.min.js?ver=1.1.0"></script>
+<script src="js/core/bootstrap.min.js?ver=1.1.0"></script>
+
+<script>
+    let date1 = new Date()
+    let date2 = new Date("2094/10/26")
+    let hours = Math.abs(date1 - date2) / 36e5
+
+    hours = Math.ceil(hours)
+    let mins = Math.ceil(hours * 60)
+    let secs = Math.ceil(hours * 60 * 60)
+    $(document).ready(() => {
+        $("#clock").text(secs + ' secs')
+        $("#clock-mins").text(mins + ' mins')
+        $("#clock-hours").text(hours + ' hours')
+        $("#clock-days").text(Math.ceil(hours / 24) + ' days')
+        $("#clock-years").text(Math.ceil(hours / (24 * 365)) + ' years')
+        setInterval(() => {
+            secs = secs - 1
+            $("#clock").text(secs + ' secs')
+        }, 1000)
+        setInterval(() => {
+            mins = mins - 1
+            $("#clock-mins").text(mins + ' mins')
+        }, 1000 * 60)
+        setInterval(() => {
+            hours = hours - 1
+            $("#clock-hours").text(hours + ' hours')
+        }, 1000 * 60 * 60)
+    })
+</script>
+</html>
