@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Investment Calculator</title>
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    thead th {
+      position: sticky;
+      top: 0;
+      background: #fff;
+      z-index: 1;
+    }
+    td, th {
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container mt-5">
+  <h1>Investment Calculator</h1>
+  <form id="calculator-form">
+    <label>Monthly Saving:</label>
+    <input type="number" id="monthlySaving" value="8000">
+    <label>Years:</label>
+    <input type="number" id="years" value="30">
+    <label>Interest Rate:</label>
+    <input type="number" id="interestRate" value="10">
+    <button type="submit" class="btn btn-primary">Calculate</button>
+  </form>
+
+  <table class="table table-striped mt-5">
+    <thead>
+    <tr>
+      <th>Month (Year)</th>
+      <th>Total Invested</th>
+      <th>Interest Earned Per Month</th>
+      <th>Interest Earned (Inflation)</th>
+      <th>Total Amount</th>
+    </tr>
+    </thead>
+    <tbody id="tableBody">
+    </tbody>
+  </table>
+</div>
+
+<script>
+  document.getElementById('calculator-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const monthlySaving = parseFloat(document.getElementById('monthlySaving').value);
+    const years = parseInt(document.getElementById('years').value);
+    const annualInterestRate = parseFloat(document.getElementById('interestRate').value) / 100;
+    const monthlyInterestRate = annualInterestRate / 12;
+    const inflationRate = 0.03; // Assuming 3% inflation rate
+    let tableBody = document.getElementById('tableBody');
+    tableBody.innerHTML = '';
+
+    let totalInvested = 0;
+    let totalAmount = 0;
+    let interestEarned = 0;
+
+    for(let i = 1; i <= years; i++) {
+      tableBody.innerHTML += `<tr><td colspan="5" class="text-center"><b>Year ${i}</b></td></tr>`;
+
+      for(let j = 1; j <= 12; j++) {
+        let row = '';
+        totalInvested += monthlySaving;
+        interestEarned = totalAmount * monthlyInterestRate;
+        totalAmount = totalAmount + monthlySaving + interestEarned;
+
+        let interestInflationAdjusted = interestEarned * Math.pow((1 - inflationRate), i);
+
+        const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+        row += `<tr><td>${monthNames[j-1]}</td>`;
+        row += `<td>${totalInvested.toFixed(2)}</td>`;
+        row += `<td>${interestEarned.toFixed(2)}</td>`;
+        row += `<td>${interestInflationAdjusted.toFixed(2)}</td>`;
+        row += `<td>${totalAmount.toFixed(2)}</td></tr>`;
+
+        tableBody.innerHTML += row;
+      }
+    }
+  });
+</script>
+
+</body>
+</html>
