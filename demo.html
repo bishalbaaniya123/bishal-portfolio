@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Open Ancestry App</title>
+    <script>
+        function tryOpenApp() {
+            // Attempt to open the app using its custom URI scheme
+            window.location.href = 'com.ancestry.Tree-To-Go://';
+
+            // Fallback to the App Store after a delay
+            setTimeout(function() {
+                window.location.href = 'https://apps.apple.com/app/ancestry/id349554263'; // App Store URL for iOS
+            }, 1000);
+        }
+    </script>
+</head>
+<body>
+    <a href="com.ancestry.Tree-To-Go://" onclick="tryOpenApp(); return false;">Open Ancestry App</a>
+</body>
+</html>
