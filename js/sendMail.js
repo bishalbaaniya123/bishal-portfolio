@@ -4,6 +4,7 @@
 let apiKey = "2b68e828-7f3c-428b-a2a0-6b0858daeb11";
 let ourEmail = "bishalbaaniya@gmail.com";
 let baseUrl = "https://api.elasticemail.com/v2/email/send";
+console.log("Hey DEVELOPER!");
 
 $("#name, #email, #message, #subject").on("change", function () {
     if ($(this).val()) {
