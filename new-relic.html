@@ -24,18 +24,6 @@
           word-wrap: break-word;
       }
 
-      button {
-          padding: 10px 20px;
-          background-color: #4CAF50;
-          color: white;
-          border: none;
-          cursor: pointer;
-      }
-
-      button:hover {
-          background-color: #45a049;
-      }
-
       .bold {
           font-weight: bold;
       }
@@ -49,9 +37,11 @@
 <body>
 <h1>Log Formatter</h1>
 <p>Paste the log below:</p>
-<textarea id="logInput" placeholder="Paste the log here"></textarea>
-<br/>
-<button onclick="formatLog()">Format Log</button>
+<textarea id="logInput" placeholder="Paste the log here" oninput="formatLog()"></textarea>
+
+<h2>Fields and their values:</h2>
+<pre id="fieldsList"></pre>
+
 <h2>Formatted logMessage:</h2>
 <pre id="output"></pre>
 
@@ -61,6 +51,13 @@
       .replace(/&/g, "&amp;")
       .replace(/</g, "&lt;")
       .replace(/>/g, "&gt;");
+  }
+
+  // Improved extraction logic
+  function extractFieldValue(field, logText) {
+    const regex = new RegExp(`"${field}"\\s*:\\s*"?([^,\\n"}]+)"?`, 'i'); // Improved regex to handle various formats
+    const match = logText.match(regex);
+    return match ? match[1].trim() : 'N/A';  // Returns field value or 'N/A' if not found
   }
 
   function formatLog() {
@@ -74,7 +71,6 @@
     // List of fields to bold
     const boldFields = [
       'eventName',
-      'schemaVersion',
       'widgetName',
       'interactionType',
       'interactLocation',
@@ -87,18 +83,40 @@
       'entryScreen'
     ];
 
+    // Fields with bold and green
+    const boldGreenFields = ['url', 'schemaVersion'];
+
+    // Prepare field and value pairs for display, excluding 'N/A'
+    let fieldsDisplay = '';
+
+    boldGreenFields.forEach(field => {
+      const value = extractFieldValue(field, formattedMessage);
+      if (value !== 'N/A') {
+        fieldsDisplay += `<span class="bold-green">${field}: ${value}</span>\n`;
+      }
+    });
+
+    boldFields.forEach(field => {
+      const value = extractFieldValue(field, formattedMessage);
+      if (value !== 'N/A') {
+        fieldsDisplay += `<span class="bold">${field}: ${value}</span>\n`;
+      }
+    });
+
+    document.getElementById('fieldsList').innerHTML = fieldsDisplay;
+
     // Split into lines and apply bold to specific fields
     const lines = formattedMessage.split('\n').map(line => {
       const escapedLine = escapeHtml(line);
 
-      // Check if the line contains one of the boldFields
-      if (boldFields.some(field => escapedLine.includes(`"${field}"`))) {
-        return `<span class="bold">${escapedLine}</span>`;
+      // Bold and green for url or schemaVersion (without quotes)
+      if (boldGreenFields.some(field => escapedLine.includes(field))) {
+        return `<span class="bold-green">${escapedLine}</span>`;
       }
 
-      // Bold and green for "url" or "schemaVersion"
-      if (escapedLine.includes('"url"') || escapedLine.includes('"schemaVersion"')) {
-        return `<span class="bold-green">${escapedLine}</span>`;
+      // Check if the line contains one of the boldFields (without quotes)
+      if (boldFields.some(field => escapedLine.includes(field))) {
+        return `<span class="bold">${escapedLine}</span>`;
       }
 
       return escapedLine;
