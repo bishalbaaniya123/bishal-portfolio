@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Log Formatter</title>
+  <style>
+      body {
+          font-family: Arial, sans-serif;
+          margin: 20px;
+      }
+
+      textarea {
+          width: 100%;
+          height: 200px;
+          margin-bottom: 20px;
+      }
+
+      pre {
+          background-color: #f4f4f4;
+          padding: 10px;
+          border-radius: 5px;
+          white-space: pre-wrap;
+          word-wrap: break-word;
+      }
+
+      button {
+          padding: 10px 20px;
+          background-color: #4CAF50;
+          color: white;
+          border: none;
+          cursor: pointer;
+      }
+
+      button:hover {
+          background-color: #45a049;
+      }
+  </style>
+</head>
+<body>
+<h1>Log Formatter</h1>
+<p>Paste the log below:</p>
+<textarea id="logInput" placeholder="Paste the log here"></textarea>
+<br/>
+<button onclick="formatLog()">Format Log</button>
+<h2>Formatted logMessage:</h2>
+<pre id="output"></pre>
+
+<script>
+  function formatLog() {
+    const logInput = document.getElementById('logInput').value
+    const formattedMessage = logInput.replace(/\\n/g, '\n').replace(/\\"/g, '')
+
+    // Display the formatted logMessage
+    document.getElementById('output').textContent = formattedMessage
+  }
+</script>
+</body>
+</html>
