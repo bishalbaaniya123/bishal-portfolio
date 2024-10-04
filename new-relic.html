@@ -35,6 +35,15 @@
       button:hover {
           background-color: #45a049;
       }
+
+      .bold {
+          font-weight: bold;
+      }
+
+      .bold-green {
+          font-weight: bold;
+          color: green;
+      }
   </style>
 </head>
 <body>
@@ -47,12 +56,56 @@
 <pre id="output"></pre>
 
 <script>
+  function escapeHtml(unsafe) {
+    return unsafe
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
+  }
+
   function formatLog() {
-    const logInput = document.getElementById('logInput').value
-    const formattedMessage = logInput.replace(/\\n/g, '\n').replace(/\\"/g, '')
+    const logInput = document.getElementById('logInput').value;
+    let formattedMessage = logInput
+      .replace(/\\n/g, '\n')
+      .replace(/\\"/g, '"')
+      .replace(/\\t/g, '  ')
+      .replace(/\\/g, '');
+
+    // List of fields to bold
+    const boldFields = [
+      'eventName',
+      'schemaVersion',
+      'widgetName',
+      'interactionType',
+      'interactLocation',
+      'interactSublocation',
+      'clickType',
+      'nodeType',
+      'interactFlow',
+      'interactDomain',
+      'entryPoint',
+      'entryScreen'
+    ];
+
+    // Split into lines and apply bold to specific fields
+    const lines = formattedMessage.split('\n').map(line => {
+      const escapedLine = escapeHtml(line);
+
+      // Check if the line contains one of the boldFields
+      if (boldFields.some(field => escapedLine.includes(`"${field}"`))) {
+        return `<span class="bold">${escapedLine}</span>`;
+      }
+
+      // Bold and green for "url" or "schemaVersion"
+      if (escapedLine.includes('"url"') || escapedLine.includes('"schemaVersion"')) {
+        return `<span class="bold-green">${escapedLine}</span>`;
+      }
+
+      return escapedLine;
+    }).join('\n');
 
     // Display the formatted logMessage
-    document.getElementById('output').textContent = formattedMessage
+    document.getElementById('output').innerHTML = lines;
   }
 </script>
 </body>
