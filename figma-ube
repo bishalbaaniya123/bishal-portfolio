@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Figma UBE validator</title>
+  <style>
+      body {
+          font-family: 'Arial', sans-serif;
+          background-color: #f4f4f9;
+          margin: 0;
+          padding: 0;
+          color: #333;
+      }
+
+      header {
+          background-color: #4CAF50;
+          color: white;
+          padding: 15px 0;
+          text-align: center;
+          font-size: 1.8em;
+          font-weight: bold;
+      }
+
+      main {
+          max-width: 900px;
+          margin: 30px auto;
+          background: white;
+          padding: 30px;
+          border-radius: 10px;
+          box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+      }
+
+      label {
+          font-weight: bold;
+          display: block;
+          margin-bottom: 5px;
+      }
+
+      textarea {
+          width: 100%;
+          height: 150px;
+          font-size: 14px;
+          padding: 10px;
+          margin-bottom: 20px;
+          border: 1px solid #ddd;
+          border-radius: 5px;
+          resize: none;
+      }
+
+      textarea:focus {
+          border-color: #4CAF50;
+          outline: none;
+      }
+
+      .jumbotron {
+          background-color: #f9f9f9;
+          padding: 20px;
+          border-radius: 8px;
+          border: 1px solid #ddd;
+          margin-top: 20px;
+      }
+
+      .header {
+          font-size: 1.2em;
+          font-weight: bold;
+      }
+
+      .error-header {
+          color: #d9534f;
+      }
+
+      .success-header {
+          color: #5cb85c;
+      }
+
+      ul {
+          list-style-type: none;
+          padding: 0;
+      }
+
+      li {
+          padding: 5px 0;
+      }
+
+      footer {
+          text-align: center;
+          margin-top: 20px;
+          font-size: 0.9em;
+          color: #666;
+      }
+  </style>
+</head>
+<body>
+<header>
+  Figma UBE validator
+</header>
+
+<main>
+  <div>
+    <label for="inputData">Input Data:</label>
+    <textarea id="inputData"></textarea>
+  </div>
+
+  <div>
+    <label for="schemaData">Source of Truth (Schema):</label>
+    <textarea id="schemaData"></textarea>
+  </div>
+
+  <div id="resultContainer"></div>
+</main>
+
+<script>
+  // Load schema and input from localStorage on page load
+  document.addEventListener('DOMContentLoaded', () => {
+    const savedSchema = localStorage.getItem('schemaData')
+    const savedInputData = localStorage.getItem('inputData')
+
+    if (savedSchema) {
+      document.getElementById('schemaData').value = savedSchema
+    }
+    if (savedInputData) {
+      document.getElementById('inputData').value = savedInputData
+    }
+
+    validateAndDisplayResults() // Trigger validation on page load
+  })
+
+  // Save data to localStorage and validate on input change
+  document.getElementById('schemaData').addEventListener('input', (event) => {
+    const schemaData = event.target.value
+    localStorage.setItem('schemaData', schemaData)
+    validateAndDisplayResults()
+  })
+
+  document.getElementById('inputData').addEventListener('input', (event) => {
+    const inputData = event.target.value
+    localStorage.setItem('inputData', inputData)
+    validateAndDisplayResults()
+  })
+
+  function validateAndDisplayResults() {
+    const inputData = document.getElementById('inputData').value
+    const schemaData = document.getElementById('schemaData').value
+
+    let schema
+    try {
+      schema = JSON.parse(schemaData)
+    } catch (e) {
+      displayError('Invalid schema format. Please ensure it is valid JSON.')
+      return
+    }
+
+    const validationResults = validateInput(inputData, schema)
+
+    if (validationResults.length > 0) {
+      displayFailures(validationResults)
+    } else {
+      displaySuccess()
+    }
+  }
+
+  function validateInput(data, schema) {
+    const schemaMap = {}
+    schema.content.fields.forEach(field => {
+      schemaMap[field.name.toLowerCase()] = field
+    })
+
+    const invalidEntries = []
+    const lines = data.split('\n')
+
+    for (let line of lines) {
+      line = line.trim().replace(/,$/, '')
+
+      if (!line) continue
+
+      const [rawKey, rawValue] = line.split('=').map(item => item.trim())
+      if (!rawKey || !rawValue) continue
+
+      const key = rawKey.toLowerCase()
+      const field = schemaMap[key]
+
+      if (!field) {
+        invalidEntries.push({key: rawKey, value: rawValue, reason: 'Field not found in schema'})
+        continue
+      }
+
+      const values = rawValue.split(',').map(value => value.trim())
+      for (const value of values) {
+        if (field.type === 'enum') {
+          if (!field.enumOptions.split(',').includes(value)) {
+            invalidEntries.push({key: rawKey, value, reason: 'Value not in allowed enum options'})
+          }
+        } else if (field.type === 'boolean') {
+          if (value !== 'true' && value !== 'false') {
+            invalidEntries.push({key: rawKey, value, reason: 'Invalid boolean value'})
+          }
+        } else if (field.type === 'integer') {
+          if (isNaN(parseInt(value, 10))) {
+            invalidEntries.push({key: rawKey, value, reason: 'Invalid integer value'})
+          }
+        } else if (field.type === 'string') {
+          if (field.size && value.length > field.size) {
+            invalidEntries.push({key: rawKey, value, reason: 'String exceeds maximum size'})
+          }
+        } else {
+          invalidEntries.push({key: rawKey, value, reason: 'Unsupported field type'})
+        }
+      }
+    }
+
+    return invalidEntries
+  }
+
+  function displayFailures(errors) {
+    const container = document.getElementById('resultContainer')
+    container.innerHTML = `
+                <div class="jumbotron">
+                    <div class="header error-header">Failing Entries</div>
+                    <ul>
+                        ${errors.map(error => `<li><b>${error.key}</b>: ${error.value} - ${error.reason}</li>`).join('')}
+                    </ul>
+                </div>
+            `
+  }
+
+  function displaySuccess() {
+    const container = document.getElementById('resultContainer')
+    container.innerHTML = `
+                <div class="jumbotron">
+                    <div class="header success-header">Everything looks good ✅</div>
+                </div>
+            `
+  }
+
+  function displayError(message) {
+    const container = document.getElementById('resultContainer')
+    container.innerHTML = `
+                <div class="jumbotron">
+                    <div class="header error-header">${message}</div>
+                </div>
+            `
+  }
+</script>
+</body>
+</html>
